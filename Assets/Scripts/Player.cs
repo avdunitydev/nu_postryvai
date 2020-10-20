@@ -21,7 +21,7 @@ public class Player : MonoBehaviour
         m_IsLeft = true;
         transform.localPosition = new Vector3(-2.3f, 0, 0);
         m_CurrentSprite.sprite = m_Sprites[0];
-        m_BasketCollider.offset = new Vector2(-1, 1.5f);
+        m_BasketCollider.offset = new Vector2(-1.1f, 1f);
     }
 
     void SetPositionTopRight()
@@ -30,7 +30,7 @@ public class Player : MonoBehaviour
         m_IsLeft = false;
         transform.localPosition = new Vector3(2.3f, 0, 0);
         m_CurrentSprite.sprite = m_Sprites[1];
-        m_BasketCollider.offset = new Vector2(1, 1.5f);
+        m_BasketCollider.offset = new Vector2(1.1f, 1f);
     }
 
     void SetPositionBottomLeft()
@@ -39,7 +39,7 @@ public class Player : MonoBehaviour
         m_IsLeft = true;
         transform.localPosition = new Vector3(-2.3f, 0, 0);
         m_CurrentSprite.sprite = m_Sprites[2];
-        m_BasketCollider.offset = new Vector2(-1, 0);
+        m_BasketCollider.offset = new Vector2(-1.1f, -1f);
     }
 
     void SetPositionBottomRight()
@@ -48,9 +48,25 @@ public class Player : MonoBehaviour
         m_IsLeft = false;
         transform.localPosition = new Vector3(2.3f, 0, 0);
         m_CurrentSprite.sprite = m_Sprites[3];
-        m_BasketCollider.offset = new Vector2(1, 0);
+        m_BasketCollider.offset = new Vector2(1.1f, -1f);
     }
 
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (m_IsTop && other.gameObject.GetComponent<Egg>().m_IsTop)
+        {
+            Destroy(other.gameObject);
+            ++GameData.SCORE;
+        }
+        else
+        {
+            Destroy(other.gameObject);
+            ++GameData.SCORE;
+
+        }
+
+
+    }
 
     // Start is called before the first frame update
     void Start()
