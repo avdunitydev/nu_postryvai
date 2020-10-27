@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class GameController : MonoBehaviour
@@ -19,16 +20,15 @@ public class GameController : MonoBehaviour
     public Button btn_NewGame;
     public Button btn_Continue;
     public Button btn_Exit;
+    public Button[] btns_InputMobile;
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
+    public int HP;
+
     [SerializeField]
 #endif
+    float m_GlobalTimer;
     float m_Timer;
-
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-    [SerializeField]
-#endif
-    bool m_EggIsDone = false;
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
     [SerializeField]
@@ -38,7 +38,6 @@ public class GameController : MonoBehaviour
 
     void CreateEgg()
     {
-        m_EggIsDone = true;
 
         bool isLeft = GameData.RandomTrueFalse();
         bool isTop = GameData.RandomTrueFalse();
@@ -76,6 +75,7 @@ public class GameController : MonoBehaviour
         }
 
         eggInstans = GameObject.Instantiate(m_EggPrefab, instansPosition, Quaternion.identity, parentPosition);
+        eggInstans.tag = "egg";
         eggInstans.GetComponent<EggController>().m_EggGameObject.GetComponent<SpriteRenderer>().flipX = flipIsRight;
         eggInstans.GetComponent<EggController>().Init(isLeft, isTop, this);
 
@@ -100,11 +100,11 @@ public class GameController : MonoBehaviour
 
         m_StartPanel.gameObject.SetActive(true);
     }
-    void ContinueGame()
+    public void ContinueGame()
     {
-        m_IsPausedGame = false;
         m_StartPanel.gameObject.SetActive(false);
         m_Score.transform.parent.gameObject.SetActive(true);
+        m_IsPausedGame = false;
         Time.timeScale = 1;
     }
     void ClearData()
@@ -112,26 +112,39 @@ public class GameController : MonoBehaviour
         m_Title_h1.text = "Ну, Постривай !!!";
         GameData.HP = 3;
         GameData.SCORE = 0;
-        GameData.SPEED = 3f;
-        m_Timer = 3f;
+        GameData.SPEED = 2f;
+        GameData.LINER_DRAG = 10f;
+        m_GlobalTimer = 0f;
+        ClearTimer();
         m_hp.Init();
     }
-    void StartNewGame()
+    public void StartNewGame()
     {
         ClearData();
+        GameData.GAME_IS_RUN = true;
         CreateEgg();
         ContinueGame();
     }
     void GameOver()
     {
         PauseGame();
+        RemoveEggsInScene();
         m_Title_h1.text = "Гру закінчено ! Незупиняйся спробуй ЩЕ ...";
         btn_NewGame.gameObject.SetActive(true);
         btn_Continue.gameObject.SetActive(false);
         m_StartPanel.gameObject.SetActive(true);
     }
 
-    void ExitGame()
+    private void RemoveEggsInScene()
+    {
+        GameObject[] availableEggs = GameObject.FindGameObjectsWithTag("egg");
+        foreach (var item in availableEggs)
+        {
+            Destroy(item);
+        }
+    }
+
+    public void ExitGame()
     {
         Application.Quit();
     }
@@ -140,17 +153,31 @@ public class GameController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        btn_NewGame.GetComponent<Button>().onClick.AddListener(StartNewGame);
-        btn_Continue.GetComponent<Button>().onClick.AddListener(ContinueGame);
-        btn_Exit.GetComponent<Button>().onClick.AddListener(ExitGame);
-
+        btn_NewGame.gameObject.SetActive(true);
+        btn_Continue.gameObject.SetActive(false);
+        m_hp.GetComponents<HP>();
         PauseGame();
+        ActivateButtonIsMobile();
+    }
+
+    void ActivateButtonIsMobile()
+    {
+        foreach (var item in btns_InputMobile)
+        {
+            item.gameObject.SetActive(GameData.IsMobile());
+        }
+
+    }
+
+    void ClearTimer()
+    {
+        m_Timer = 10f;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (GameData.SCORE != 0)
+        if (GameData.GAME_IS_RUN)
         {
             if (Input.GetKeyDown(KeyCode.Escape))
             {
@@ -161,35 +188,39 @@ public class GameController : MonoBehaviour
 
         if (!m_IsPausedGame)
         {
-            m_Timer -= Time.deltaTime;
+            m_GlobalTimer += Time.deltaTime;
+            if (m_GlobalTimer >= 10)
+            {
+                Debug.Log("Speed UP");
+                ++GameData.SPEED;
+                if (GameData.LINER_DRAG > 0) --GameData.LINER_DRAG;
+                m_GlobalTimer = 0f;
+            }
+
+
+
+            m_Timer -= Time.deltaTime * GameData.SPEED;
             if (m_Timer <= 0)
             {
-                m_EggIsDone = false;
-                m_Timer = 3f;
+                CreateEgg();
+                ClearTimer();
             }
 
-            if (!m_EggIsDone)
-            {
-                CreateEgg();
-            }
+            m_Score.text = GameData.SCORE.ToString();
 
         }
+
+        if (GameData.SCORE != 0 && !GameData.GAME_IS_RUN) GameOver();
 
     }
 
     private void FixedUpdate()
     {
-        if (!m_IsPausedGame)
-        {
-            m_Score.text = GameData.SCORE.ToString();
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+     HP = GameData.HP;
+#endif
 
-            if (GameData.HP <= 0)
-            {
-                GameOver();
-            }
-        }
-
-    }
+}
 
 
 }

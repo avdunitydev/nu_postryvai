@@ -21,11 +21,10 @@ public class EggController : MonoBehaviour
     public void EggRemove()
     {
         m_Controller.m_hp.RemoveLife();
+
         m_AnimDie.transform.parent.gameObject.SetActive(true);
         if (m_IsLeft) m_AnimDie.GetComponent<Animator>().Play("dieLeft");
         else m_AnimDie.GetComponent<Animator>().Play("dieRight");
-
-        Destroy(gameObject, 1.3f);
     }
 
 

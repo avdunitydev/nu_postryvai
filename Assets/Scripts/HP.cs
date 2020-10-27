@@ -6,14 +6,13 @@ public class HP : MonoBehaviour
 {
     public Sprite m_HPSprite;
 
-    ArrayList m_Lifes;
+    ArrayList m_Lifes = new ArrayList();
 
     Vector3 m_PositionOffset = Vector3.zero;
     Vector3 m_SpriteScale = new Vector3(.5f, .5f, 1);
 
     public void Init()
     {
-        m_Lifes = new ArrayList();
 
         for (int i = 0; i < GameData.HP; i++)
         {
@@ -33,24 +32,12 @@ public class HP : MonoBehaviour
     public void RemoveLife()
     {
         --GameData.HP;
-        int lastIndex = m_Lifes.Count -1;
-
-        Destroy((GameObject)m_Lifes[lastIndex]);
+        int lastIndex = m_Lifes.Count - 1;
+        Destroy(m_Lifes[lastIndex] as GameObject);
 
         m_Lifes.RemoveAt(lastIndex);
-
     }
 
-
-    private void Start()
-    {
-        
-    }
-
-    private void FixedUpdate()
-    {
-
-    }
 
 
 }

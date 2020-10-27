@@ -15,7 +15,7 @@ public class Player : MonoBehaviour
     SpriteRenderer m_CurrentSprite;
     CircleCollider2D m_BasketCollider;
 
-    void SetPositionTopLeft()
+    public void SetPositionTopLeft()
     {
         m_IsTop = true;
         m_IsLeft = true;
@@ -24,7 +24,7 @@ public class Player : MonoBehaviour
         m_BasketCollider.offset = new Vector2(-1.1f, 1f);
     }
 
-    void SetPositionTopRight()
+    public void SetPositionTopRight()
     {
         m_IsTop = true;
         m_IsLeft = false;
@@ -33,22 +33,22 @@ public class Player : MonoBehaviour
         m_BasketCollider.offset = new Vector2(1.1f, 1f);
     }
 
-    void SetPositionBottomLeft()
+    public void SetPositionBottomLeft()
     {
         m_IsTop = false;
         m_IsLeft = true;
         transform.localPosition = new Vector3(-2.3f, 0, 0);
         m_CurrentSprite.sprite = m_Sprites[2];
-        m_BasketCollider.offset = new Vector2(-1.1f, -.9f);
+        m_BasketCollider.offset = new Vector2(-1.1f, -.8f);
     }
 
-    void SetPositionBottomRight()
+    public void SetPositionBottomRight()
     {
         m_IsTop = false;
         m_IsLeft = false;
         transform.localPosition = new Vector3(2.3f, 0, 0);
         m_CurrentSprite.sprite = m_Sprites[3];
-        m_BasketCollider.offset = new Vector2(1.1f, -.9f);
+        m_BasketCollider.offset = new Vector2(1.1f, -.8f);
     }
 
     void OnTriggerEnter2D(Collider2D other)
@@ -71,59 +71,63 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.UpArrow))
+        if (!GameData.IsMobile())
         {
-            if (m_IsLeft)
+            if (Input.GetKeyDown(KeyCode.UpArrow))
             {
-                SetPositionTopLeft();
-            }
-            else
-            {
-                SetPositionTopRight();
+                if (m_IsLeft)
+                {
+                    SetPositionTopLeft();
+                }
+                else
+                {
+                    SetPositionTopRight();
+                }
+
             }
 
+            if (Input.GetKeyDown(KeyCode.DownArrow))
+            {
+                if (m_IsLeft)
+                {
+                    SetPositionBottomLeft();
+                }
+                else
+                {
+                    SetPositionBottomRight();
+                }
+
+            }
+
+            if (Input.GetKeyDown(KeyCode.LeftArrow))
+            {
+                if (m_IsTop)
+                {
+                    SetPositionTopLeft();
+                }
+                else
+                {
+                    SetPositionBottomLeft();
+                }
+
+
+            }
+
+            if (Input.GetKeyDown(KeyCode.RightArrow))
+            {
+                if (m_IsTop)
+                {
+                    SetPositionTopRight();
+                }
+                else
+                {
+                    SetPositionBottomRight();
+                }
+
+
+            }
         }
 
-        if (Input.GetKeyDown(KeyCode.DownArrow))
-        {
-            if (m_IsLeft)
-            {
-                SetPositionBottomLeft();
-            }
-            else
-            {
-                SetPositionBottomRight();
-            }
-
-        }
-
-        if (Input.GetKeyDown(KeyCode.LeftArrow))
-        {
-            if (m_IsTop)
-            {
-                SetPositionTopLeft();
-            }
-            else
-            {
-                SetPositionBottomLeft();
-            }
-
-
-        }
-
-        if (Input.GetKeyDown(KeyCode.RightArrow))
-        {
-            if (m_IsTop)
-            {
-                SetPositionTopRight();
-            }
-            else
-            {
-                SetPositionBottomRight();
-            }
-
-
-        }
 
 
 
