@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class GamePlatform : MonoBehaviour
@@ -8,7 +6,6 @@ public class GamePlatform : MonoBehaviour
     Camera m_Camera;
     Image m_FrameImage;
 
-    // Start is called before the first frame update
     void Start()
     {
         if (TryGetComponent<Image>(out m_FrameImage))

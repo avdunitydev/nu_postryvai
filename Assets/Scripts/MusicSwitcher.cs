@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class MusicSwitcher : MonoBehaviour
@@ -10,7 +8,6 @@ public class MusicSwitcher : MonoBehaviour
 
     Image m_SoundImage;
 
-    [SerializeField]
     GameData.enum_MusicMode m_Mode;
 
     public void onClickSwitcher()

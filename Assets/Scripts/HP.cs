@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class HP : MonoBehaviour
@@ -38,6 +37,5 @@ public class HP : MonoBehaviour
         m_Lifes.RemoveAt(lastIndex);
     }
 
-
-
+   
 }
