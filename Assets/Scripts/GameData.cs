@@ -16,5 +16,5 @@ public static class GameData
     public static bool RandomTrueFalse() => (UnityEngine.Random.Range(-1.0f, 1.0f) >= 0) ? true : false;
     public static bool IsMobile() => (UnityEngine.Application.isMobilePlatform) ? true : false;
 
-
+    public delegate void my_EventHandler();
 }

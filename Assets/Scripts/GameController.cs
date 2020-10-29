@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class GameController : MonoBehaviour
@@ -14,6 +13,7 @@ public class GameController : MonoBehaviour
 
     public Text m_Title_h1;
     public Text m_Title_h2;
+    public Text m_Title_h3;
     public Text m_Score;
     public HP m_hp;
 
@@ -22,18 +22,16 @@ public class GameController : MonoBehaviour
     public Button btn_Exit;
     public Button[] btns_InputMobile;
 
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-    public int HP;
+    public bool m_IsPausedGame = false;
+    public event GameData.my_EventHandler OnSpeedUp;
 
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
     [SerializeField]
 #endif
     float m_GlobalTimer;
     float m_Timer;
+    int m_BestScore;
 
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-    [SerializeField]
-#endif
-    bool m_IsPausedGame = false;
 
 
     void CreateEgg()
@@ -78,22 +76,41 @@ public class GameController : MonoBehaviour
         eggInstans.tag = "egg";
         eggInstans.GetComponent<EggController>().m_EggGameObject.GetComponent<SpriteRenderer>().flipX = flipIsRight;
         eggInstans.GetComponent<EggController>().Init(isLeft, isTop, this);
+        eggInstans.GetComponent<EggController>().m_EggGameObject.GetComponent<Egg>().OnEggIsBroke += HitEggIsBroke;
+        eggInstans.GetComponent<EggController>().m_AnimDie.GetComponent<EggDieAnimation>().OnEndOfDieAnimationEgg += HitEndAnimationEggIsBroke;
 
     }
 
+    private void HitEndAnimationEggIsBroke()
+    {
+        if (GameData.HP <= 0)
+        {
+            GameData.GAME_IS_RUN = false;
+            GameOver();
+        }
+    }
+
+    void HitEggIsBroke()
+    {
+        m_hp.RemoveLife();
+    }
 
     void PauseGame()
     {
+        m_BestScore =  (m_BestScore > GameData.SCORE) ? m_BestScore : GameData.SCORE;
         m_IsPausedGame = true;
         Time.timeScale = 0;
         m_Score.transform.parent.gameObject.SetActive(false);
         m_Title_h2.gameObject.SetActive(false);
+        m_Title_h3.gameObject.SetActive(false);
 
         if (GameData.SCORE != 0)
         {
             m_Title_h1.text = "Гра на паузі ... Ну, Постривай!";
             m_Title_h2.text = "Твої БАЛИ : " + GameData.SCORE.ToString();
+            m_Title_h3.text = $"Рекорд Гри: [{m_BestScore}]";
             m_Title_h2.gameObject.SetActive(true);
+            m_Title_h3.gameObject.SetActive(true);
             btn_NewGame.gameObject.SetActive(false);
             btn_Continue.gameObject.SetActive(true);
         }
@@ -102,6 +119,7 @@ public class GameController : MonoBehaviour
     }
     public void ContinueGame()
     {
+        GameData.GAME_IS_RUN = true;
         m_StartPanel.gameObject.SetActive(false);
         m_Score.transform.parent.gameObject.SetActive(true);
         m_IsPausedGame = false;
@@ -110,7 +128,7 @@ public class GameController : MonoBehaviour
     void ClearData()
     {
         m_Title_h1.text = "Ну, Постривай !!!";
-        GameData.HP = 3;
+        GameData.HP = 4;
         GameData.SCORE = 0;
         GameData.SPEED = 2f;
         GameData.LINER_DRAG = 10f;
@@ -150,16 +168,6 @@ public class GameController : MonoBehaviour
     }
 
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        btn_NewGame.gameObject.SetActive(true);
-        btn_Continue.gameObject.SetActive(false);
-        m_hp.GetComponents<HP>();
-        PauseGame();
-        ActivateButtonIsMobile();
-    }
-
     void ActivateButtonIsMobile()
     {
         foreach (var item in btns_InputMobile)
@@ -174,6 +182,37 @@ public class GameController : MonoBehaviour
         m_Timer = 10f;
     }
 
+    private void SpeedUpLevel()
+    {
+        if (!m_IsPausedGame)
+        {
+            m_GlobalTimer += Time.deltaTime;
+            if (m_GlobalTimer >= 10)
+            {
+                OnSpeedUp?.Invoke();
+                ++GameData.SPEED;
+                if (GameData.LINER_DRAG > 0) --GameData.LINER_DRAG;
+                m_GlobalTimer = 0f;
+            }
+        }
+    }
+
+
+    private void Awake()
+    {
+        m_BestScore = PlayerPrefs.GetInt("best_score");
+    }
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        btn_NewGame.gameObject.SetActive(true);
+        btn_Continue.gameObject.SetActive(false);
+        m_hp.GetComponents<HP>();
+        PauseGame();
+        ActivateButtonIsMobile();
+    }
+
     // Update is called once per frame
     void Update()
     {
@@ -186,19 +225,10 @@ public class GameController : MonoBehaviour
             }
         }
 
+        SpeedUpLevel();
+
         if (!m_IsPausedGame)
         {
-            m_GlobalTimer += Time.deltaTime;
-            if (m_GlobalTimer >= 10)
-            {
-                Debug.Log("Speed UP");
-                ++GameData.SPEED;
-                if (GameData.LINER_DRAG > 0) --GameData.LINER_DRAG;
-                m_GlobalTimer = 0f;
-            }
-
-
-
             m_Timer -= Time.deltaTime * GameData.SPEED;
             if (m_Timer <= 0)
             {
@@ -210,17 +240,10 @@ public class GameController : MonoBehaviour
 
         }
 
-        if (GameData.SCORE != 0 && !GameData.GAME_IS_RUN) GameOver();
-
     }
 
-    private void FixedUpdate()
+    private void OnApplicationQuit()
     {
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-     HP = GameData.HP;
-#endif
-
-}
-
-
+        PlayerPrefs.SetInt("best_score", m_BestScore);
+    }
 }
