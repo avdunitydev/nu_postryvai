@@ -1,10 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Player : MonoBehaviour
 {
     public Sprite[] m_Sprites;
+    public AudioSource SFX_EggCatch;
 
     [SerializeField]
     bool m_IsTop;
@@ -14,6 +13,8 @@ public class Player : MonoBehaviour
 
     SpriteRenderer m_CurrentSprite;
     CircleCollider2D m_BasketCollider;
+
+    GameController gameController;
 
     public void SetPositionTopLeft()
     {
@@ -56,6 +57,7 @@ public class Player : MonoBehaviour
         if (m_IsTop == other.transform.parent.GetComponent<EggController>().m_IsTop)
         {
             Destroy(other.transform.parent.gameObject);
+            SFX_EggCatch.Play();
             ++GameData.SCORE;
         }
     }
@@ -63,6 +65,8 @@ public class Player : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        gameController = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>();
+        SFX_EggCatch = GetComponent<AudioSource>();
         m_CurrentSprite = GetComponent<SpriteRenderer>();
         m_BasketCollider = GetComponent<CircleCollider2D>();
         SetPositionTopLeft();
@@ -73,58 +77,52 @@ public class Player : MonoBehaviour
     {
         if (!GameData.IsMobile())
         {
-            if (Input.GetKeyDown(KeyCode.UpArrow))
+            if (!gameController.m_IsPausedGame)
             {
-                if (m_IsLeft)
+                if (Input.GetKeyDown(KeyCode.UpArrow))
                 {
-                    SetPositionTopLeft();
+                    if (m_IsLeft)
+                    {
+                        SetPositionTopLeft();
+                    }
+                    else
+                    {
+                        SetPositionTopRight();
+                    }
                 }
-                else
+                if (Input.GetKeyDown(KeyCode.DownArrow))
                 {
-                    SetPositionTopRight();
+                    if (m_IsLeft)
+                    {
+                        SetPositionBottomLeft();
+                    }
+                    else
+                    {
+                        SetPositionBottomRight();
+                    }
                 }
-
-            }
-
-            if (Input.GetKeyDown(KeyCode.DownArrow))
-            {
-                if (m_IsLeft)
+                if (Input.GetKeyDown(KeyCode.LeftArrow))
                 {
-                    SetPositionBottomLeft();
+                    if (m_IsTop)
+                    {
+                        SetPositionTopLeft();
+                    }
+                    else
+                    {
+                        SetPositionBottomLeft();
+                    }
                 }
-                else
+                if (Input.GetKeyDown(KeyCode.RightArrow))
                 {
-                    SetPositionBottomRight();
+                    if (m_IsTop)
+                    {
+                        SetPositionTopRight();
+                    }
+                    else
+                    {
+                        SetPositionBottomRight();
+                    }
                 }
-
-            }
-
-            if (Input.GetKeyDown(KeyCode.LeftArrow))
-            {
-                if (m_IsTop)
-                {
-                    SetPositionTopLeft();
-                }
-                else
-                {
-                    SetPositionBottomLeft();
-                }
-
-
-            }
-
-            if (Input.GetKeyDown(KeyCode.RightArrow))
-            {
-                if (m_IsTop)
-                {
-                    SetPositionTopRight();
-                }
-                else
-                {
-                    SetPositionBottomRight();
-                }
-
-
             }
         }
 
